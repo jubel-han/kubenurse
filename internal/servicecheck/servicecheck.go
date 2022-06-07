@@ -208,7 +208,7 @@ func (c *Checker) measure(check Check, label string) (string, error) {
 	return res, err
 }
 
-// getActiveChecks get the list of the enabled checks
+// GetActiveChecks get the list of the enabled checks
 func (c *Checker) GetActiveChecks(activeChecksEnvStr string) *ActiveChecks {
 	if c.ActiveChecks != nil {
 		return c.ActiveChecks
@@ -222,10 +222,10 @@ func (c *Checker) GetActiveChecks(activeChecksEnvStr string) *ActiveChecks {
 	}
 
 	c.ActiveChecks.APIServerDirect = strings.Contains(activeChecksEnvStr, "api_server_direct")
-	c.ActiveChecks.APIServerDNS = strings.Contains(activeChecksEnvStr, "api_server_direct")
-	c.ActiveChecks.MeIngress = strings.Contains(activeChecksEnvStr, "api_server_direct")
-	c.ActiveChecks.MeService = strings.Contains(activeChecksEnvStr, "api_server_direct")
-	c.ActiveChecks.Neighbourhood = strings.Contains(activeChecksEnvStr, "api_server_direct")
+	c.ActiveChecks.APIServerDNS = strings.Contains(activeChecksEnvStr, "api_server_dns")
+	c.ActiveChecks.MeIngress = strings.Contains(activeChecksEnvStr, "me_ingress")
+	c.ActiveChecks.MeService = strings.Contains(activeChecksEnvStr, "me_service")
+	c.ActiveChecks.Neighbourhood = strings.Contains(activeChecksEnvStr, "me_neighbour")
 
 	return c.ActiveChecks
 }

@@ -8,12 +8,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// ActiveChecks contains a list of checks with boolean type indicating if it is in active
 type ActiveChecks struct {
-	APIServerDirect    bool `json:"api_server_direct"`
-	APIServerDNS       bool `json:"api_server_dns"`
-	MeIngress          bool `json:"me_ingress"`
-	MeService          bool `json:"me_service"`
-	Neighbourhood      bool `json:"neighbourhood"`
+	APIServerDirect bool `json:"api_server_direct"`
+	APIServerDNS    bool `json:"api_server_dns"`
+	MeIngress       bool `json:"me_ingress"`
+	MeService       bool `json:"me_service"`
+	Neighbourhood   bool `json:"neighbourhood"`
 }
 
 // Checker implements the kubenurse checker

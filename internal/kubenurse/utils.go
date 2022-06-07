@@ -11,7 +11,9 @@ func getIntEnv(envStr string, defaultValue int) int {
 		if err != nil {
 			return defaultValue
 		}
+
 		return intValue
 	}
+
 	return defaultValue
 }

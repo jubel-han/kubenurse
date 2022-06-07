@@ -44,6 +44,7 @@ func TestCombined(t *testing.T) {
 	r.NoError(err)
 	r.NotNil(checker)
 
+	checker.GetActiveChecks("")
 	t.Run("run", func(t *testing.T) {
 		r := require.New(t)
 		result, hadError := checker.Run()
