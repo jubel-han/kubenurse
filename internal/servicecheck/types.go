@@ -8,6 +8,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+type ActiveChecks struct {
+	APIServerDirect    bool `json:"api_server_direct"`
+	APIServerDNS       bool `json:"api_server_dns"`
+	MeIngress          bool `json:"me_ingress"`
+	MeService          bool `json:"me_service"`
+	Neighbourhood      bool `json:"neighbourhood"`
+}
+
 // Checker implements the kubenurse checker
 type Checker struct {
 	// Ingress and service config
@@ -22,6 +30,9 @@ type Checker struct {
 	KubenurseNamespace string
 	NeighbourFilter    string
 	allowUnschedulable bool
+
+	// ActiveChecks indicated if the check actively enabled
+	ActiveChecks *ActiveChecks
 
 	// TLS
 	UseTLS bool

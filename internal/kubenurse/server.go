@@ -43,6 +43,9 @@ type Server struct {
 // * KUBERNETES_SERVICE_PORT
 // * KUBENURSE_NAMESPACE
 // * KUBENURSE_NEIGHBOUR_FILTER
+// * KUBENURSE_ACTIVE_CHECKS
+// * KUBENURSE_CACHE_RESULT_TTL
+// * KUBENURSE_CHECK_INTERVAL
 func New(ctx context.Context, k8s kubernetes.Interface) (*Server, error) {
 	mux := http.NewServeMux()
 
@@ -82,7 +85,8 @@ func New(ctx context.Context, k8s kubernetes.Interface) (*Server, error) {
 	}
 
 	// setup checker
-	chk, err := servicecheck.New(ctx, discovery, promRegistry, server.allowUnschedulable, 3*time.Second)
+	cacheResultTTL := getIntEnv("KUBENURSE_CACHE_RESULT_TTL", 3)
+	chk, err := servicecheck.New(ctx, discovery, promRegistry, server.allowUnschedulable, time.Duration(cacheResultTTL) * time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +97,7 @@ func New(ctx context.Context, k8s kubernetes.Interface) (*Server, error) {
 	chk.KubernetesServicePort = os.Getenv("KUBERNETES_SERVICE_PORT")
 	chk.KubenurseNamespace = os.Getenv("KUBENURSE_NAMESPACE")
 	chk.NeighbourFilter = os.Getenv("KUBENURSE_NEIGHBOUR_FILTER")
+	chk.GetActiveChecks(os.Getenv("KUBENURSE_ACTIVE_CHECKS"))
 	chk.UseTLS = server.useTLS
 
 	server.checker = chk
@@ -118,8 +123,8 @@ func (s *Server) Run() error {
 
 	go func() {
 		defer wg.Done()
-
-		s.checker.RunScheduled(5 * time.Second)
+		interval := getIntEnv("KUBENURSE_CHECK_INTERVAL", 5)
+		s.checker.RunScheduled(time.Duration(interval) * time.Second)
 	}()
 
 	wg.Add(1)

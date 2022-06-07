@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/postfinance/kubenurse/internal/kubediscovery"
@@ -86,29 +87,39 @@ func (c *Checker) Run() (Result, bool) {
 	// Run Checks
 	res := Result{}
 
-	res.APIServerDirect, err = c.measure(c.APIServerDirect, "api_server_direct")
-	haserr = haserr || (err != nil)
+	if c.ActiveChecks.APIServerDirect {
+		res.APIServerDirect, err = c.measure(c.APIServerDirect, "api_server_direct")
+		haserr = haserr || (err != nil)
+	}
 
-	res.APIServerDNS, err = c.measure(c.APIServerDNS, "api_server_dns")
-	haserr = haserr || (err != nil)
+	if c.ActiveChecks.APIServerDNS {
+		res.APIServerDNS, err = c.measure(c.APIServerDNS, "api_server_dns")
+		haserr = haserr || (err != nil)
+	}
 
-	res.MeIngress, err = c.measure(c.MeIngress, "me_ingress")
-	haserr = haserr || (err != nil)
+	if c.ActiveChecks.MeIngress {
+		res.MeIngress, err = c.measure(c.MeIngress, "me_ingress")
+		haserr = haserr || (err != nil)
+	}
 
-	res.MeService, err = c.measure(c.MeService, "me_service")
-	haserr = haserr || (err != nil)
+	if c.ActiveChecks.MeService {
+		res.MeService, err = c.measure(c.MeService, "me_service")
+		haserr = haserr || (err != nil)
+	}
 
-	res.Neighbourhood, err = c.discovery.GetNeighbours(context.TODO(), c.KubenurseNamespace, c.NeighbourFilter)
-	haserr = haserr || (err != nil)
+	if c.ActiveChecks.Neighbourhood {
+		res.Neighbourhood, err = c.discovery.GetNeighbours(context.TODO(), c.KubenurseNamespace, c.NeighbourFilter)
+		haserr = haserr || (err != nil)
 
-	// Neighbourhood special error treating
-	if err != nil {
-		res.NeighbourhoodState = err.Error()
-	} else {
-		res.NeighbourhoodState = okStr
+		// Neighbourhood special error treating
+		if err != nil {
+			res.NeighbourhoodState = err.Error()
+		} else {
+			res.NeighbourhoodState = okStr
 
-		// Check all neighbours if the neighbourhood was discovered
-		c.checkNeighbours(res.Neighbourhood)
+			// Check all neighbours if the neighbourhood was discovered
+			c.checkNeighbours(res.Neighbourhood)
+		}
 	}
 
 	// Cache result
@@ -195,4 +206,26 @@ func (c *Checker) measure(check Check, label string) (string, error) {
 	}
 
 	return res, err
+}
+
+// getActiveChecks get the list of the enabled checks
+func (c *Checker) GetActiveChecks(activeChecksEnvStr string) *ActiveChecks {
+	if c.ActiveChecks != nil {
+		return c.ActiveChecks
+	}
+	// by default enabling of the checks
+	c.ActiveChecks = &ActiveChecks{true, true, true, true, true}
+
+	if activeChecksEnvStr == "" {
+		log.Printf("not found active checks from env, enabling all checks by default.")
+		return c.ActiveChecks
+	}
+
+	c.ActiveChecks.APIServerDirect = strings.Contains(activeChecksEnvStr, "api_server_direct")
+	c.ActiveChecks.APIServerDNS = strings.Contains(activeChecksEnvStr, "api_server_direct")
+	c.ActiveChecks.MeIngress = strings.Contains(activeChecksEnvStr, "api_server_direct")
+	c.ActiveChecks.MeService = strings.Contains(activeChecksEnvStr, "api_server_direct")
+	c.ActiveChecks.Neighbourhood = strings.Contains(activeChecksEnvStr, "api_server_direct")
+
+	return c.ActiveChecks
 }
