@@ -15,8 +15,8 @@ dockers:
     ids:
       - kubenurse
     image_templates:
-      - "postfinance/kubenurse:latest"
-      - "postfinance/kubenurse:{{ .Tag }}"
+      - "jubel/kubenurse:latest"
+      - "jubel/kubenurse:{{ .Tag }}"
     dockerfile: Dockerfile
 checksum:
   name_template: 'checksums.txt'
